@@ -1,14 +1,28 @@
 #ifndef QPLOTTER_H
 #define QPLOTTER_H
 
-#include <QtCharts/QScatterSeries>
-#include <chartview.h>
+#include <QtCharts>
 
-class QPlotter
+QT_BEGIN_NAMESPACE
+class QGestureEvent;
+QT_END_NAMESPACE
+
+QT_USE_NAMESPACE
+
+
+class QPlotter : public QChart
 {
 public:
-    QPlotter();
+    explicit QPlotter(QGraphicsItem *parent = nullptr, Qt::WindowFlags wFlags = {});
+    ~QPlotter();
 
+protected:
+    bool sceneEvent(QEvent *event);
+
+private:
+    bool gestureEvent(QGestureEvent *event);
+
+private:
 
 };
 

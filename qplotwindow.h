@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <BTC.h>
 #include <BTCSet.h>
+#include <qplotter.h>
 
 #define outputtimeseriesprecision double
 
@@ -63,6 +64,7 @@ public:
 
 private:
     Ui::QPlotWindow *ui;
+    QPlotter* chart;
 };
 
 #endif // QPLOTWINDOW_H
