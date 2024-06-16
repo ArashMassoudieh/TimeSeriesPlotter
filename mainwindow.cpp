@@ -19,12 +19,15 @@ MainWindow::~MainWindow()
 void MainWindow::on_Plot()
 {
     QPlotWindow* plotwindow = new QPlotWindow(this);
-    CTimeSeries<double> timeseries;
-    for (double t=1; t<2; t+=0.4)
-    {
-        timeseries.append(t,sin(t/100));
+    CTimeSeriesSet<double> timeseriesset(3);
+    for (int j=0; j<3; j++)
+    {   for (double t=44420; t<44600; t+=0.4)
+        {
+            timeseriesset.BTC[j].append(t,sin(t/100)+j/3.0);
+        }
+        timeseriesset.setname(j,("Value " + QString::number(j+1)).toStdString());
     }
-    plotwindow->PlotData(timeseries);
+    plotwindow->PlotData(timeseriesset,true);
     plotwindow->show();
 }
 
