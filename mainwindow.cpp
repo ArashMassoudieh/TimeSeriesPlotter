@@ -20,7 +20,7 @@ void MainWindow::on_Plot()
 {
     QPlotWindow* plotwindow = new QPlotWindow(this);
     CTimeSeries<double> timeseries;
-    for (double t=42000; t<42200; t+=0.4)
+    for (double t=1; t<2; t+=0.4)
     {
         timeseries.append(t,sin(t/100));
     }

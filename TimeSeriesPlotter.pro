@@ -8,6 +8,9 @@ CONFIG += c++11
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+DEFINES += _NO_GSL
+DEFINES += _MacOS
+
 INCLUDEPATH += ../QAquifolium/ \
     ../Utilities/ \
 
@@ -20,8 +23,10 @@ SOURCES += \
     qplotwindow.cpp
 
 HEADERS += \
-    ../QAquifolium/aquifolium/src/BTC.hpp \
-    ../QAquifolium/aquifolium/src/BTCSet.hpp \
+    ../Utilities/BTC.h \
+    ../Utilities/BTCSet.h \
+    ../Utilities/BTC.hpp \
+    ../Utilities/BTCSet.hpp \
     chartview.h \
     mainwindow.h \
     qplotter.h \
