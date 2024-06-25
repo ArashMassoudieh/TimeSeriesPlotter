@@ -8,6 +8,8 @@
 
 #define outputtimeseriesprecision double
 
+class MainWindow;
+
 struct plotformat{
     Qt::GlobalColor color = Qt::red;
     QBrush brush = QBrush(QColor(240, 255, 200));
@@ -51,7 +53,7 @@ class QPlotWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit QPlotWindow(QWidget *parent = nullptr);
+    explicit QPlotWindow(MainWindow *parent = nullptr);
     ~QPlotWindow();
     bool PlotData(const CTimeSeries<outputtimeseriesprecision>& BTC, bool allowtime=true, string style="line");
     bool PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& BTC, bool allowtime=true, string style="line");
@@ -71,6 +73,10 @@ private:
     double timetoX(const double &time) {
         return (time + 2209161600) / 86400;
     }
+
+private slots:
+     void contextMenuRequest(QPoint pos);
+
 };
 
 #endif // QPLOTWINDOW_H

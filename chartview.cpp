@@ -1,11 +1,14 @@
 #include "chartview.h"
 #include <QtGui/QMouseEvent>
+#include "mainwindow.h"
 
-ChartView::ChartView(QChart *chart, QWidget *parent) :
-    QChartView(chart, parent),
+
+ChartView::ChartView(QChart *chart, MainWindow *_parent) :
+    QChartView(chart, _parent),
     m_isTouching(false)
 {
-    setRubberBand(QChartView::RectangleRubberBand);
+    parent = _parent;
+    setRubberBand(QChartView::NoRubberBand);
 }
 
 bool ChartView::viewportEvent(QEvent *event)
@@ -20,6 +23,13 @@ bool ChartView::viewportEvent(QEvent *event)
 
 void ChartView::mousePressEvent(QMouseEvent *event)
 {
+    m_lastMousePos = event->pos();
+    qDebug()<<event->type();
+    if (event->type() == QEvent::MouseButtonDblClick)
+    {
+        chart()->zoomReset();
+        return;
+    }
     if (m_isTouching)
         return;
 
@@ -54,12 +64,47 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
 
 void ChartView::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (double_clicked)
+    {
+        double_clicked = false;
+        return;
+    }
+
     if (m_isTouching)
         m_isTouching = false;
 
     chart()->setAnimationOptions(QChart::SeriesAnimations);
 
-    QChartView::mouseReleaseEvent(event);
+    if (event->button() == Qt::MouseButton::LeftButton)
+    {
+        QRect rect(QPoint(m_lastMousePos.x(),m_lastMousePos.y()), QPoint(event->pos().x(),event->pos().y()));
+        chart()->zoomIn(rect);
+    }
+    else
+    {
+        QMenu *menu = new QMenu(this);
+        if (chart()->series().count()==1)
+        {
+            menu->addAction("Copy curve");
+        }
+        else
+            menu->addAction("Copy Curves");
+
+        menu->addAction("Zoom Extends");
+        QAction *selectedAction = menu->exec(mapToGlobal(event->pos()));
+        if (selectedAction->text().contains("Copy"))
+        {
+            parent ->graphsClipboard.clear();
+            for (int i = 0; i < chart()->series().count() ; i++)
+            {
+                QLineSeries *series = new QLineSeries(chart()->series()[i]);
+                parent->graphsClipboard.insert(chart()->series()[i]->name(), series);
+            }
+
+        }
+
+    }
+
 }
 
 
@@ -98,6 +143,7 @@ void ChartView::mouseDoubleClickEvent( QMouseEvent * e )
     if ( e->button() == Qt::LeftButton )
     {
         chart()->zoomReset();
+        double_clicked = true;
     }
 
     QGraphicsView::mouseDoubleClickEvent( e );

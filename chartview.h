@@ -7,11 +7,13 @@
 QT_USE_NAMESPACE
 
 
+class MainWindow;
+
 class ChartView : public QChartView
 
 {
 public:
-    ChartView(QChart *chart, QWidget *parent = 0);
+    ChartView(QChart *chart, MainWindow *parent = 0);
 
 
 protected:
@@ -25,6 +27,8 @@ protected:
 private:
     bool m_isTouching;
     QPointF m_lastMousePos;
+    bool double_clicked = false;
+    MainWindow *parent;
 };
 
 #endif

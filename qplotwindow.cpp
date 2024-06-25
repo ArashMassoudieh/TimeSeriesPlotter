@@ -2,16 +2,18 @@
 #include "ui_qplotwindow.h"
 #include "chartview.h"
 
+#include "mainwindow.h"
 
-
-QPlotWindow::QPlotWindow(QWidget *parent) :
+QPlotWindow::QPlotWindow(MainWindow *parent) :
     QDialog(parent),
     ui(new Ui::QPlotWindow)
 {
     ui->setupUi(this);
     chart = new QPlotter();
-    ChartView *chartview = new ChartView(chart);
+    ChartView *chartview = new ChartView(chart, parent);
     ui->verticalLayout->addWidget(chartview);
+
+    //chart->setContextMenuPolicy(Qt::CustomContextMenu);
 
 }
 
@@ -192,5 +194,13 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
 }
 bool QPlotWindow::AddData(const CTimeSeries<outputtimeseriesprecision>& BTC,bool allowtime, string style)
 {
+
+}
+
+void QPlotWindow::contextMenuRequest(QPoint pos)
+{
+    QMenu *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    menu->exec();
 
 }
