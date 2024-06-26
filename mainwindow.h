@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QtCharts/QLineSeries>
+#include "BTC.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,7 +16,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    QMap<QString, QtCharts::QLineSeries* > graphsClipboard;
+    QMap<QString, CTimeSeries<double>* > graphsClipboard;
 private:
     Ui::MainWindow *ui;
 

@@ -9,6 +9,7 @@
 #define outputtimeseriesprecision double
 
 class MainWindow;
+class ChartView;
 
 struct plotformat{
     Qt::GlobalColor color = Qt::red;
@@ -62,17 +63,29 @@ public:
     void SetXAxisTitle(const QString& s);
     void SetTimeFormat(bool timedate);
     void SetLegend(bool onoff);
-
+    CTimeSeries<double> GetTimeSeries(const QString &name) {return TimeSeries[name];}
 
 private:
     Ui::QPlotWindow *ui;
     QPlotter* chart;
+    ChartView *chartview;
     double xtoTime(const double &x) {
         return x * 86400 - 2209161600;
     }
     double timetoX(const double &time) {
         return (time + 2209161600) / 86400;
     }
+    QMap<QString,CTimeSeries<double>> TimeSeries;
+    QValueAxis* axisY;
+    QValueAxis* axisX_normal;
+    QDateTimeAxis *axisX_date;
+    double x_min_val = 1e7;
+    double x_max_val = -1e7;
+    double y_min_val = 1e7;
+    double y_max_val = -1e7;
+    QDateTime start;
+    QDateTime end;
+
 
 private slots:
      void contextMenuRequest(QPoint pos);

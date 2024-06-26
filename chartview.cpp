@@ -1,13 +1,14 @@
 #include "chartview.h"
 #include <QtGui/QMouseEvent>
 #include "mainwindow.h"
+#include "qplotwindow.h"
 
-
-ChartView::ChartView(QChart *chart, MainWindow *_parent) :
-    QChartView(chart, _parent),
+ChartView::ChartView(QChart *_chart, QPlotWindow *_plotWindow, MainWindow *_parent) :
+    QChartView(_chart, _parent),
     m_isTouching(false)
 {
     parent = _parent;
+    plotWindow = _plotWindow;
     setRubberBand(QChartView::NoRubberBand);
 }
 
@@ -89,6 +90,11 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
         }
         else
             menu->addAction("Copy Curves");
+        QAction *paste = menu->addAction("Paste");
+        if (parent->graphsClipboard.size()==0)
+            paste->setEnabled(false);
+        else
+            paste->setEnabled(true);
 
         menu->addAction("Zoom Extends");
         QAction *selectedAction = menu->exec(mapToGlobal(event->pos()));
@@ -97,9 +103,14 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
             parent ->graphsClipboard.clear();
             for (int i = 0; i < chart()->series().count() ; i++)
             {
-                QLineSeries *series = new QLineSeries(chart()->series()[i]);
-                parent->graphsClipboard.insert(chart()->series()[i]->name(), series);
+                parent->graphsClipboard.insert(chart()->series()[i]->name(),  new CTimeSeries<double>(plotWindow->GetTimeSeries(chart()->series()[i]->name())) );
             }
+
+        }
+        if (selectedAction->text().contains("Paste"))
+        {
+            for (QMap<QString, CTimeSeries<double>*>::Iterator it = parent->graphsClipboard.begin(); it!= parent->graphsClipboard.end(); it++)
+                plotWindow->PlotData(*it.value());
 
         }
 

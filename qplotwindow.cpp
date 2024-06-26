@@ -10,7 +10,7 @@ QPlotWindow::QPlotWindow(MainWindow *parent) :
 {
     ui->setupUi(this);
     chart = new QPlotter();
-    ChartView *chartview = new ChartView(chart, parent);
+    chartview = new ChartView(chart, this, parent);
     ui->verticalLayout->addWidget(chartview);
 
     //chart->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -40,8 +40,8 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
 
     QString xAxisTitle = "Time (day)";
     QString yAxisTitle = "Value";
-    QValueAxis* axisX_normal = new QValueAxis();
-    QDateTimeAxis *axisX_date = new QDateTimeAxis;
+    axisX_normal = new QValueAxis();
+    axisX_date = new QDateTimeAxis();
 
     axisX_normal->setTickCount(10);
     axisX_date->setTickCount(10);
@@ -61,7 +61,7 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
         axisX_date->setRange(start ,end);
     }
 
-    QValueAxis* axisY = new QValueAxis();
+    axisY = new QValueAxis();
 
     axisY->setObjectName("axisY");
     axisY->setTitleText(yAxisTitle);
@@ -89,8 +89,8 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
     pen.setWidth(2);
     pen.setBrush(QColor(QRandomGenerator::global()->bounded(256), QRandomGenerator::global()->bounded(256), QRandomGenerator::global()->bounded(256)));
     lineseries->setPen(pen);
-    lineseries->setName(QString::fromStdString("Value"));
-
+    lineseries->setName(QString::fromStdString(timeseries.name));
+    TimeSeries.insert(lineseries->name(),timeseries);
 
 
 
@@ -109,23 +109,23 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
 }
 bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& timeseriesset, bool allowtime, string style)
 {
-    double x_min_val = timeseriesset.mintime();
-    double x_max_val = timeseriesset.maxtime();
-    double y_min_val = timeseriesset.minval();
-    double y_max_val = timeseriesset.maxval();
+    x_min_val = timeseriesset.mintime();
+    x_max_val = timeseriesset.maxtime();
+    y_min_val = timeseriesset.minval();
+    y_max_val = timeseriesset.maxval();
 
 #ifndef Qt6
-        QDateTime start = QDateTime::fromTime_t(xtoTime(x_min_val), QTimeZone(0));
-        QDateTime end = QDateTime::fromTime_t(xtoTime(x_max_val), QTimeZone(0));
+        start = QDateTime::fromTime_t(xtoTime(x_min_val), QTimeZone(0));
+        end = QDateTime::fromTime_t(xtoTime(x_max_val), QTimeZone(0));
 #else
-        QDateTime start = QDateTime::fromSecsSinceEpoch(xtoTime(x_min_val));
-        QDateTime end = QDateTime::fromSecsSinceEpoch(xtoTime(x_max_val));
+        start = QDateTime::fromSecsSinceEpoch(xtoTime(x_min_val));
+        end = QDateTime::fromSecsSinceEpoch(xtoTime(x_max_val));
 #endif
 
     QString xAxisTitle = "Time (day)";
     QString yAxisTitle = "Value";
-    QValueAxis* axisX_normal = new QValueAxis();
-    QDateTimeAxis *axisX_date = new QDateTimeAxis;
+    axisX_normal = new QValueAxis();
+    axisX_date = new QDateTimeAxis;
 
     axisX_normal->setTickCount(10);
     axisX_date->setTickCount(10);
@@ -145,7 +145,7 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
         axisX_date->setRange(start ,end);
     }
 
-    QValueAxis* axisY = new QValueAxis();
+    axisY = new QValueAxis();
 
     axisY->setObjectName("axisY");
     axisY->setTitleText(yAxisTitle);
@@ -175,6 +175,8 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
         pen.setBrush(QColor(QRandomGenerator::global()->bounded(256), QRandomGenerator::global()->bounded(256), QRandomGenerator::global()->bounded(256)));
         lineseries->setPen(pen);
         lineseries->setName(QString::fromStdString(timeseriesset.names[i]));
+        TimeSeries.insert(lineseries->name(),timeseriesset.BTC[i]);
+
     }
 
 
@@ -192,9 +194,55 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
         axisX_normal->setLabelsAngle(-90);
     return true;
 }
-bool QPlotWindow::AddData(const CTimeSeries<outputtimeseriesprecision>& BTC,bool allowtime, string style)
+bool QPlotWindow::AddData(const CTimeSeries<outputtimeseriesprecision>& timeseries,bool allowtime, string style)
 {
+    x_min_val = min(timeseries.mint(),x_min_val);
+    x_max_val = max(timeseries.mint(),x_max_val);
+    y_min_val = min(timeseries.minC(),y_min_val);
+    y_max_val = max(timeseries.maxC(),y_max_val);
 
+#ifndef Qt6
+        start = QDateTime::fromTime_t(xtoTime(x_min_val), QTimeZone(0));
+        end = QDateTime::fromTime_t(xtoTime(x_max_val), QTimeZone(0));
+#else
+        start = QDateTime::fromSecsSinceEpoch(xtoTime(x_min_val));
+        end = QDateTime::fromSecsSinceEpoch(xtoTime(x_max_val));
+#endif
+
+
+    QLineSeries *lineseries = new QLineSeries();
+    chart->addSeries(lineseries);
+    if (allowtime)
+    {   lineseries->attachAxis(axisX_date);
+        axisX_date->setRange(start ,end);
+    }
+    else
+    {   lineseries->attachAxis(axisX_normal);
+        axisX_normal->setRange(x_min_val ,x_max_val);
+    }
+    axisY->setRange(y_min_val,y_max_val);
+    lineseries->attachAxis(axisY);
+
+
+    for (int j=0; j<timeseries.n; j++)
+    {
+        if (allowtime)
+            lineseries->append(QDateTime::fromTime_t(xtoTime(timeseries.GetT(j))).toMSecsSinceEpoch(),timeseries.GetC(j));
+        else
+            lineseries->append(timeseries.GetT(j),timeseries.GetC(j));
+    }
+
+
+
+    QPen pen = lineseries->pen();
+    pen.setWidth(2);
+    pen.setBrush(QColor(QRandomGenerator::global()->bounded(256), QRandomGenerator::global()->bounded(256), QRandomGenerator::global()->bounded(256)));
+    lineseries->setPen(pen);
+    lineseries->setName(QString::fromStdString(timeseries.name));
+    TimeSeries.insert(lineseries->name(),timeseries);
+
+
+    return true;
 }
 
 void QPlotWindow::contextMenuRequest(QPoint pos)

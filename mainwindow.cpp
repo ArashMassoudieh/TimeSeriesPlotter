@@ -29,5 +29,19 @@ void MainWindow::on_Plot()
     }
     plotwindow->PlotData(timeseriesset,true);
     plotwindow->show();
+
+    QPlotWindow* plotwindow2= new QPlotWindow(this);
+    CTimeSeriesSet<double> timeseriesset2(2);
+    for (int j=0; j<2; j++)
+    {   for (double t=44420; t<44600; t+=0.4)
+        {
+            timeseriesset2.BTC[j].append(t,cos(t/100)+j/3.0);
+        }
+        timeseriesset2.setname(j,("Value " + QString::number(j+10)).toStdString());
+    }
+    plotwindow2->PlotData(timeseriesset2,true);
+    plotwindow->AddData(timeseriesset2.BTC[0],true);
+    plotwindow->AddData(timeseriesset2.BTC[1],true);
+    plotwindow2->show();
 }
 

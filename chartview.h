@@ -8,12 +8,13 @@ QT_USE_NAMESPACE
 
 
 class MainWindow;
+class QPlotWindow;
 
 class ChartView : public QChartView
 
 {
 public:
-    ChartView(QChart *chart, MainWindow *parent = 0);
+    ChartView(QChart *chart, QPlotWindow *plotWindow, MainWindow *parent);
 
 
 protected:
@@ -23,12 +24,13 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void mouseDoubleClickEvent( QMouseEvent * e );
-
+    QPlotWindow* PlotWindow() {return plotWindow;}
 private:
     bool m_isTouching;
     QPointF m_lastMousePos;
     bool double_clicked = false;
     MainWindow *parent;
+    QPlotWindow *plotWindow;
 };
 
 #endif
