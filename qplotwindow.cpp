@@ -34,8 +34,8 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
         QDateTime start = QDateTime::fromTime_t(xtoTime(timeseries.GetT(0)), QTimeZone(0));
         QDateTime end = QDateTime::fromTime_t(xtoTime(timeseries.GetT(timeseries.n - 1)), QTimeZone(0));
 #else
-        QDateTime start = QDateTime::fromSecsSinceEpoch(xtoTime(BTC.GetT(0)));
-        QDateTime end = QDateTime::fromSecsSinceEpoch(xtoTime(BTC.n - 1));
+        QDateTime start = QDateTime::fromSecsSinceEpoch(xtoTime(timeseries.GetT(0)));
+        QDateTime end = QDateTime::fromSecsSinceEpoch(xtoTime(timeseries.n - 1));
 #endif
 
     QString xAxisTitle = "Time (day)";
@@ -81,7 +81,11 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
     for (int j=0; j<timeseries.n; j++)
     {
         if (allowtime)
+#ifndef Qt6
             lineseries->append(QDateTime::fromTime_t(xtoTime(timeseries.GetT(j))).toMSecsSinceEpoch(),timeseries.GetC(j));
+#else
+            lineseries->append(QDateTime::fromSecsSinceEpoch(xtoTime(timeseries.GetT(j))).toMSecsSinceEpoch(),timeseries.GetC(j));
+#endif
         else
             lineseries->append(timeseries.GetT(j),timeseries.GetC(j));
     }
@@ -166,7 +170,11 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
         for (int j=0; j<timeseriesset.BTC[i].n; j++)
         {
             if (allowtime)
-                lineseries->append(QDateTime::fromTime_t(xtoTime(timeseriesset.BTC[i].GetT(j))).toMSecsSinceEpoch(),timeseriesset.BTC[i].GetC(j));
+#ifndef Qt6
+            lineseries->append(QDateTime::fromTime_t(xtoTime(timeseriesset.BTC[i].GetT(j))).toMSecsSinceEpoch(),timeseriesset.BTC[i].GetC(j));
+#else
+            lineseries->append(QDateTime::fromSecsSinceEpoch(xtoTime(timeseriesset.BTC[i].GetT(j))).toMSecsSinceEpoch(),timeseriesset.BTC[i].GetC(j));
+#endif
             else
                 lineseries->append(timeseriesset.BTC[i].GetT(j),timeseriesset.BTC[i].GetC(j));
         }
@@ -227,7 +235,11 @@ bool QPlotWindow::AddData(const CTimeSeries<outputtimeseriesprecision>& timeseri
     for (int j=0; j<timeseries.n; j++)
     {
         if (allowtime)
+#ifndef Qt6
             lineseries->append(QDateTime::fromTime_t(xtoTime(timeseries.GetT(j))).toMSecsSinceEpoch(),timeseries.GetC(j));
+#else
+            lineseries->append(QDateTime::fromSecsSinceEpoch(xtoTime(timeseries.GetT(j))).toMSecsSinceEpoch(),timeseries.GetC(j));
+#endif
         else
             lineseries->append(timeseries.GetT(j),timeseries.GetC(j));
     }

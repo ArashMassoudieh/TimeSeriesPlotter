@@ -10,7 +10,7 @@ CONFIG += c++11
 
 DEFINES += _NO_GSL
 DEFINES += _MacOS
-
+DEFINES += Qt6
 INCLUDEPATH += ../QAquifolium/ \
     ../Utilities/ \
 

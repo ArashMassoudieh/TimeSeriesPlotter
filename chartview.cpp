@@ -110,7 +110,7 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
         if (selectedAction->text().contains("Paste"))
         {
             for (QMap<QString, CTimeSeries<double>*>::Iterator it = parent->graphsClipboard.begin(); it!= parent->graphsClipboard.end(); it++)
-                plotWindow->PlotData(*it.value());
+                plotWindow->AddData(*it.value());
 
         }
 
