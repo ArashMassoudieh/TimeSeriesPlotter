@@ -2,7 +2,7 @@
 #include "ui_qplotwindow.h"
 #include "chartview.h"
 
-#include "_mainwindow.h"
+#include "mainwindow.h"
 
 QPlotWindow::QPlotWindow(MainWindow *parent) :
     QDialog(parent),
@@ -12,7 +12,11 @@ QPlotWindow::QPlotWindow(MainWindow *parent) :
     chart = new QPlotter();
     chartview = new ChartView(chart, this, parent);
     ui->verticalLayout->addWidget(chartview);
-
+    qDebug()<<parent->resource_directory;
+    QString iconfilename = parent->resource_directory + "/Icons/export.png";
+    QIcon icon = QIcon(parent->resource_directory + "/Icons/export.png");
+    connect(ui->toolButton,SIGNAL(clicked()),this, SLOT(ExportToPNG()));
+    ui->toolButton->setIcon(icon);
     //chart->setContextMenuPolicy(Qt::CustomContextMenu);
 
 }
@@ -36,7 +40,7 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
         QDateTime end = QDateTime::fromTime_t(xtoTime(timeseries.GetT(timeseries.n - 1)), QTimeZone(0));
 #else
         QDateTime start = QDateTime::fromSecsSinceEpoch(xtoTime(timeseries.GetT(0)));
-        QDateTime end = QDateTime::fromSecsSinceEpoch(xtoTime(timeseries.n - 1));
+        QDateTime end = QDateTime::fromSecsSinceEpoch(xtoTime(timeseries.GetT(timeseries.n-1)));
 #endif
 
     QString xAxisTitle = x_Axis_Title;
@@ -331,4 +335,21 @@ bool QPlotWindow::SetYAxis(bool log)
 
 
 
+}
+
+void QPlotWindow::ExportToPNG()
+{
+    QRect rect = QDialog::frameGeometry();
+
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save"), "",
+        tr("png file (*.png)"));
+
+    if (!fileName.contains("."))
+        fileName+=".png";
+    chart->setAnimationOptions(QChart::NoAnimation);
+    this->resize(rect.width() * 2, rect.height() * 2);
+
+    chartview->grab().save(fileName);
+    this->resize(rect.size());
 }

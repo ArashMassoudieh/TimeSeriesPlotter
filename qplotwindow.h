@@ -104,6 +104,7 @@ private:
 
 private slots:
      void contextMenuRequest(QPoint pos);
+     void ExportToPNG();
 
 };
 

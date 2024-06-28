@@ -17,6 +17,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     QMap<QString, CTimeSeries<double>* > graphsClipboard;
+    QString resource_directory;
 private:
     Ui::MainWindow *ui;
 
