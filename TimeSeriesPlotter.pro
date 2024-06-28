@@ -18,7 +18,7 @@ INCLUDEPATH += ../QAquifolium/ \
 SOURCES += \
     chartview.cpp \
     main.cpp \
-    mainwindow.cpp \
+    _mainwindow.cpp \
     qplotter.cpp \
     qplotwindow.cpp
 
@@ -28,7 +28,7 @@ HEADERS += \
     ../Utilities/BTC.hpp \
     ../Utilities/BTCSet.hpp \
     chartview.h \
-    mainwindow.h \
+    _mainwindow.h \
     qplotter.h \
     qplotwindow.h
 

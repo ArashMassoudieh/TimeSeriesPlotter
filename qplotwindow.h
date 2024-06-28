@@ -10,7 +10,7 @@
 
 class MainWindow;
 class ChartView;
-
+/*
 struct plotformat{
     Qt::GlobalColor color = Qt::red;
     QBrush brush = QBrush(QColor(240, 255, 200));
@@ -43,7 +43,7 @@ struct _timeseries
     QString name;
     CTimeSeriesSet<outputtimeseriesprecision> Data;
 };
-
+*/
 
 namespace Ui {
 class QPlotWindow;
@@ -59,12 +59,24 @@ public:
     bool PlotData(const CTimeSeries<outputtimeseriesprecision>& BTC, bool allowtime=true, string style="line");
     bool PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& BTC, bool allowtime=true, string style="line");
     bool AddData(const CTimeSeries<outputtimeseriesprecision>& BTC,bool allowtime=true, string style="line");
-    void SetYAxisTitle(const QString& s);
-    void SetXAxisTitle(const QString& s);
+    void SetYAxisTitle(const QString& s)
+    {
+        y_Axis_Title = s;
+        if (axisY)
+            axisY->setTitleText(s);
+    }
+    void SetXAxisTitle(const QString& s)
+    {
+        x_Axis_Title = s;
+        if (axisX_date)
+            axisX_date->setTitleText(s);
+        if (axisX_normal)
+            axisX_normal->setTitleText(s);
+    }
+    void SetLegend(bool val);
     void SetTimeFormat(bool timedate);
-    void SetLegend(bool onoff);
     CTimeSeries<double> GetTimeSeries(const QString &name) {return TimeSeries[name];}
-
+    bool SetYAxis(bool log);
 private:
     Ui::QPlotWindow *ui;
     QPlotter* chart;
@@ -76,15 +88,18 @@ private:
         return (time + 2209161600) / 86400;
     }
     QMap<QString,CTimeSeries<double>> TimeSeries;
-    QValueAxis* axisY;
-    QValueAxis* axisX_normal;
-    QDateTimeAxis *axisX_date;
+    QValueAxis* axisY = nullptr;
+    QLogValueAxis* axisY_log = nullptr;
+    QValueAxis* axisX_normal = nullptr;
+    QDateTimeAxis *axisX_date = nullptr;
     double x_min_val = 1e7;
     double x_max_val = -1e7;
     double y_min_val = 1e7;
     double y_max_val = -1e7;
     QDateTime start;
     QDateTime end;
+    QString x_Axis_Title;
+    QString y_Axis_Title;
 
 
 private slots:

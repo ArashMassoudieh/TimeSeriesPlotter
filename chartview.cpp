@@ -1,6 +1,6 @@
 #include "chartview.h"
 #include <QtGui/QMouseEvent>
-#include "mainwindow.h"
+#include "_mainwindow.h"
 #include "qplotwindow.h"
 
 ChartView::ChartView(QChart *_chart, QPlotWindow *_plotWindow, MainWindow *_parent) :
@@ -91,13 +91,18 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
         else
             menu->addAction("Copy Curves");
         QAction *paste = menu->addAction("Paste");
-        if (parent->graphsClipboard.size()==0)
+        if (parent->graphsClipboard.isEmpty())
             paste->setEnabled(false);
         else
             paste->setEnabled(true);
 
         menu->addAction("Zoom Extends");
+        QMenu *subMenuY = menu->addMenu("Y-axis");
+        QAction *Ylog_action = subMenuY->addAction("Log-scale");
+        Ylog_action->setCheckable(true);
         QAction *selectedAction = menu->exec(mapToGlobal(event->pos()));
+        if (!selectedAction)
+            return;
         if (selectedAction->text().contains("Copy"))
         {
             parent ->graphsClipboard.clear();
@@ -111,6 +116,22 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
         {
             for (QMap<QString, CTimeSeries<double>*>::Iterator it = parent->graphsClipboard.begin(); it!= parent->graphsClipboard.end(); it++)
                 plotWindow->AddData(*it.value());
+
+        }
+        if (selectedAction->text().contains("Zoom Extends"))
+        {
+            chart()->zoomReset();
+
+        }
+        if (selectedAction->text().contains("Log"))
+        {
+            SetYLogAxis(!Ylog());
+            if (Ylog())
+            {
+                Ylog_action->setChecked(true);
+            }
+            else
+                Ylog_action->setChecked(false);
 
         }
 
@@ -158,4 +179,10 @@ void ChartView::mouseDoubleClickEvent( QMouseEvent * e )
     }
 
     QGraphicsView::mouseDoubleClickEvent( e );
+}
+
+void ChartView::SetYLogAxis(bool val) {
+
+    logYAxis = val;
+    plotWindow->SetYAxis(val);
 }

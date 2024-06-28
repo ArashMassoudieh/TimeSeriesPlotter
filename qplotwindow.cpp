@@ -2,7 +2,7 @@
 #include "ui_qplotwindow.h"
 #include "chartview.h"
 
-#include "mainwindow.h"
+#include "_mainwindow.h"
 
 QPlotWindow::QPlotWindow(MainWindow *parent) :
     QDialog(parent),
@@ -29,7 +29,8 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
     double x_max_val = timeseries.maxt();
     double y_min_val = timeseries.minC();
     double y_max_val = timeseries.maxC();
-
+    if (x_max_val<20000)
+        allowtime = false;
 #ifndef Qt6
         QDateTime start = QDateTime::fromTime_t(xtoTime(timeseries.GetT(0)), QTimeZone(0));
         QDateTime end = QDateTime::fromTime_t(xtoTime(timeseries.GetT(timeseries.n - 1)), QTimeZone(0));
@@ -38,8 +39,8 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
         QDateTime end = QDateTime::fromSecsSinceEpoch(xtoTime(timeseries.n - 1));
 #endif
 
-    QString xAxisTitle = "Time (day)";
-    QString yAxisTitle = "Value";
+    QString xAxisTitle = x_Axis_Title;
+    QString yAxisTitle = y_Axis_Title;
     axisX_normal = new QValueAxis();
     axisX_date = new QDateTimeAxis();
 
@@ -61,14 +62,24 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
         axisX_date->setRange(start ,end);
     }
 
-    axisY = new QValueAxis();
+    if (!chartview->Ylog())
+    {
+        axisY = new QValueAxis();
+        axisY->setObjectName("axisY");
+        axisY->setTitleText(yAxisTitle);
+        axisY->setRange(y_min_val,y_max_val);
+        chart->addAxis(axisY, Qt::AlignLeft);
+    }
+    else
+    {
+        axisY_log = new QLogValueAxis();
+        axisY_log->setObjectName("axisY");
+        axisY_log->setTitleText(yAxisTitle);
+        axisY_log->setRange(y_min_val,y_max_val);
+        axisY_log->setMinorTickCount(8);
+        chart->addAxis(axisY_log, Qt::AlignLeft);
+    }
 
-    axisY->setObjectName("axisY");
-    axisY->setTitleText(yAxisTitle);
-
-    axisY->setRange(y_min_val,y_max_val);
-
-    chart->addAxis(axisY, Qt::AlignLeft);
 
     QLineSeries *lineseries = new QLineSeries();
     chart->addSeries(lineseries);
@@ -76,7 +87,10 @@ bool QPlotWindow::PlotData(const CTimeSeries<outputtimeseriesprecision>& timeser
         lineseries->attachAxis(axisX_date);
     else
         lineseries->attachAxis(axisX_normal);
-    lineseries->attachAxis(axisY);
+    if (!chartview->Ylog())
+        lineseries->attachAxis(axisY);
+    else
+        lineseries->attachAxis(axisY_log);
 
     for (int j=0; j<timeseries.n; j++)
     {
@@ -118,6 +132,9 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
     y_min_val = timeseriesset.minval();
     y_max_val = timeseriesset.maxval();
 
+    if (x_max_val<20000)
+        allowtime = false;
+
 #ifndef Qt6
         start = QDateTime::fromTime_t(xtoTime(x_min_val), QTimeZone(0));
         end = QDateTime::fromTime_t(xtoTime(x_max_val), QTimeZone(0));
@@ -126,15 +143,15 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
         end = QDateTime::fromSecsSinceEpoch(xtoTime(x_max_val));
 #endif
 
-    QString xAxisTitle = "Time (day)";
-    QString yAxisTitle = "Value";
+    QString xAxisTitle = x_Axis_Title;
+    QString yAxisTitle = y_Axis_Title;
     axisX_normal = new QValueAxis();
     axisX_date = new QDateTimeAxis;
 
     axisX_normal->setTickCount(10);
     axisX_date->setTickCount(10);
     if (!allowtime)
-    {   axisX_normal->setTitleText("X");
+    {   axisX_normal->setTitleText(x_Axis_Title);
         chart->addAxis(axisX_normal, Qt::AlignBottom);
         axisX_normal->setObjectName("axisX");
         axisX_normal->setTitleText(xAxisTitle);
@@ -142,22 +159,30 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
     }
     else
     {
-        axisX_date->setTitleText("X");
+        axisX_date->setTitleText(x_Axis_Title);
         chart->addAxis(axisX_date, Qt::AlignBottom);
         axisX_date->setObjectName("axisX");
         axisX_date->setTitleText(xAxisTitle);
         axisX_date->setRange(start ,end);
     }
 
-    axisY = new QValueAxis();
-
-    axisY->setObjectName("axisY");
-    axisY->setTitleText(yAxisTitle);
-
-    axisY->setRange(y_min_val,y_max_val);
-
-    chart->addAxis(axisY, Qt::AlignLeft);
-
+    if (!chartview->Ylog())
+    {
+        axisY = new QValueAxis();
+        axisY->setObjectName("axisY");
+        axisY->setTitleText(yAxisTitle);
+        axisY->setRange(y_min_val,y_max_val);
+        chart->addAxis(axisY, Qt::AlignLeft);
+    }
+    else
+    {
+        axisY_log = new QLogValueAxis();
+        axisY_log->setObjectName("axisY");
+        axisY_log->setTitleText(yAxisTitle);
+        axisY_log->setRange(y_min_val,y_max_val);
+        axisY_log->setMinorTickCount(8);
+        chart->addAxis(axisY_log, Qt::AlignLeft);
+    }
     for (int i=0; i<timeseriesset.nvars; i++)
     {   QLineSeries *lineseries = new QLineSeries();
         chart->addSeries(lineseries);
@@ -165,7 +190,10 @@ bool QPlotWindow::PlotData(const CTimeSeriesSet<outputtimeseriesprecision>& time
             lineseries->attachAxis(axisX_date);
         else
             lineseries->attachAxis(axisX_normal);
-        lineseries->attachAxis(axisY);
+        if (!chartview->Ylog())
+            lineseries->attachAxis(axisY);
+        else
+            lineseries->attachAxis(axisY_log);
 
         for (int j=0; j<timeseriesset.BTC[i].n; j++)
         {
@@ -262,5 +290,45 @@ void QPlotWindow::contextMenuRequest(QPoint pos)
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     menu->exec();
+
+}
+
+void QPlotWindow::SetLegend(bool val)
+{
+    chart->legend()->setVisible(val);
+}
+
+bool QPlotWindow::SetYAxis(bool log)
+{
+
+    if (!chartview->Ylog())
+    {
+        axisY = new QValueAxis();
+        axisY->setObjectName("axisY");
+        axisY->setTitleText(x_Axis_Title);
+        axisY->setRange(y_min_val,y_max_val);
+        chart->addAxis(axisY, Qt::AlignLeft);
+        chart->removeAxis(axisY_log);
+        for (int i=0; i<chart->series().size(); i++)
+        {
+            chart->series()[i]->attachAxis(axisY);
+        }
+    }
+    else
+    {
+        axisY_log = new QLogValueAxis();
+        axisY_log->setObjectName("axisY");
+        axisY_log->setTitleText(y_Axis_Title);
+        axisY_log->setRange(y_min_val,y_max_val);
+        axisY_log->setMinorTickCount(8);
+        chart->addAxis(axisY_log, Qt::AlignLeft);
+        chart->removeAxis(axisY);
+        for (int i=0; i<chart->series().size(); i++)
+        {
+            chart->series()[i]->attachAxis(axisY_log);
+        }
+    }
+
+
 
 }
